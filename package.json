@@ -9,10 +9,12 @@
   "description": "Backend of react-invoice-generator built in ExpressJS",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "devDependencies": {
     "nodemon": "^3.1.4"
   },
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
