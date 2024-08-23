@@ -6,7 +6,7 @@ import DB_INFO from '../constants/constants.js';
 dotenv.config();
 
 async function findItem(client, db_name, collection) {
-    const result = await client.db(db_name).collection(collection).find({});
+    const result = await client.db(db_name).collection(collection).find({}).toArray();
     return result;
 };
 
@@ -25,8 +25,8 @@ async function createItem(client, itemData, db_name, collection) {
 async function getItem(req, res, mongoClient) {
     const result = await findItem(
         mongoClient, 
-        DB_INFO.jay-ambe.DB_NAME, 
-        DB_INFO.jay-ambe.COLLECTION        
+        DB_INFO.main.DB_NAME, 
+        DB_INFO.main.COLLECTION        
     );
     if (!result) {
         res.send({
@@ -54,8 +54,8 @@ async function insertItem(req, res, mongoClient) {
     const result = await createItem(
         mongoClient, 
         req.body, 
-        DB_INFO.jay-ambe.DB_NAME, 
-        DB_INFO.jay-ambe.COLLECTION
+        DB_INFO.main.DB_NAME, 
+        DB_INFO.main.COLLECTION
     );
 
     if (!result.insertedId) {
@@ -108,7 +108,6 @@ async function updateItem(req, res, mongoClient) {
 
 var wrapper = function(mongoClient) {
     var router = express.Router();
-    console.log("Inside pricemanager")
     router.post('/addItem', (req, res) => insertItem(req, res, mongoClient));
     router.get('/getItem', (req, res) => getItem(req, res, mongoClient));
     router.post('/updateItem', (req, res) => updateItem(req, res, mongoClient));

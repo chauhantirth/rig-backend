@@ -1,5 +1,5 @@
 const DB_ = {
-    "jay-ambe": {
+    "main": {
         "DB_NAME": "testdb",
         "COLLECTION": "items",
     },
