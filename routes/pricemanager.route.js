@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import { ObjectId } from "mongodb";
 
 import DB_INFO from '../constants/constants.js';
 
@@ -11,14 +12,15 @@ async function findItem(client, db_name, collection) {
 };
 
 async function modifyItem(client, filterItemId, newItemData, db_name, collection) {
-    const result = await client.db(db_name).collection(collection).updateOne({_id: filterItemId}, { $set: newItemData});
-    console.log(`Items Updated: ${result}`);
+    // console.log(`Inside modifyItem(). recieved: ${JSON.stringify({newItemData})} to update _id: ${filterItemId}`)
+    var o_id = new ObjectId(filterItemId);
+    const result = await client.db(db_name).collection(collection).updateOne({_id: o_id}, {$set: newItemData});
+    console.log(`Items Updated: ${JSON.stringify(result)}`);
     return result;
 }
 
 async function createItem(client, itemData, db_name, collection) {
     const result = await client.db(db_name).collection(collection).insertOne(itemData);
-    console.log(`Inserted Doc: ${result.insertedId}`);
     return result;
 }
 
@@ -34,26 +36,32 @@ async function getItem(req, res, mongoClient) {
             'errorMessage': 'We are unable to fetch the item(s), Please try again later.',
             'errorCode': '3000'
         })
+        return;
     } else {
         res.send({
             'success': true,
             'container': [result],
         });
+        return;
     }
 }
 
 async function insertItem(req, res, mongoClient) {
-    if (!req.body.price || !req.body.label) {
+    if (!req.body.price || !req.body.label || !req.body.value) {
         res.send({
             'success': false,
-            'errorMessage': 'No post data found',
+            'errorMessage': 'Improper post data.',
             'errorCode': '2000'
         })
+        return;
     }
-
     const result = await createItem(
         mongoClient, 
-        req.body, 
+        {
+            "value": req.body.value,
+            "label": req.body.label,
+            "price": req.body.price
+        },
         DB_INFO.main.DB_NAME, 
         DB_INFO.main.COLLECTION
     );
@@ -64,45 +72,61 @@ async function insertItem(req, res, mongoClient) {
             'errorMessage': 'We are unable to insert the item, Please try again later.',
             'errorCode': '3000'
         })
+        return;
     } else {
         res.send({
             'success': true,
-            'container': [result],
+            'message': 'Item successfully added to the database.',
+            'container': JSON.stringify(result),
         });
+        return;
     }
 }
 
 async function updateItem(req, res, mongoClient) {
-    if (!req.body.new_price || !req.body.new_label, !req.body.item_id) {
+    if (!req.body.item_id) {
         res.send({
             'success': false,
-            'errorMessage': 'No post data found',
-            'errorCode': '2000'
+            'errorMessage': 'Item id not found.',
+            'errorCode': '1001'
         })
+        return;
     }
+    if (!req.body.price && !req.body.value && !req.body.label) {
+        res.send({
+            'success': false,
+            'errorMessage': 'Please attach the data to be updated.',
+            'errorCode': '1002'
+        })     
+        return;       
+    }
+
+    let updateDocument = {}
+    if (req.body.value) {updateDocument.value = req.body.value}
+    if (req.body.label) {updateDocument.label = req.body.label}
+    if (req.body.price) {updateDocument.price = req.body.price}
+
     const result = await modifyItem(
         mongoClient, 
         req.body.item_id,
-        { 
-            label: req.body.new_label,
-            name: req.body.new_name,
-            price: req.body.new_price,
-        },
-        DB_INFO.gujcet.DB_NAME, 
-        DB_INFO.gujcet.COLLECTION
+        updateDocument,
+        DB_INFO.main.DB_NAME, 
+        DB_INFO.main.COLLECTION
     );
 
-    if (!result) {
+    if (!result.acknowledged) {
         res.send({
             'success': false,
-            'errorMessage': 'We are unable to find the result, Please verify your Aadhar Number and try again',
-            'errorCode': '3000'
+            'errorMessage': 'We are unable to update the item, Please try again later.',
+            'errorCode': '1003'
         })
+        return;
     } else {
         res.send({
             'success': true,
-            'container': [reault],
+            'container': JSON.stringify(result),
         });
+        return;
     }
 }
 
