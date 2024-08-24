@@ -51,7 +51,7 @@ async function insertItem(req, res, mongoClient) {
         res.send({
             'success': false,
             'errorMessage': 'Improper post data.',
-            'errorCode': '2000'
+            'errorCode': '2001'
         })
         return;
     }
@@ -70,7 +70,7 @@ async function insertItem(req, res, mongoClient) {
         res.send({
             'success': false,
             'errorMessage': 'We are unable to insert the item, Please try again later.',
-            'errorCode': '3000'
+            'errorCode': '2000'
         })
         return;
     } else {
@@ -118,7 +118,7 @@ async function updateItem(req, res, mongoClient) {
         res.send({
             'success': false,
             'errorMessage': 'We are unable to update the item, Please try again later.',
-            'errorCode': '1003'
+            'errorCode': '1000'
         })
         return;
     } else {
@@ -138,7 +138,7 @@ var wrapper = function(mongoClient) {
     router.get('/', (req, res) =>  {return res.status(404).json({
         'success': false,
         'errorMessage': 'Method not allowed on this route',
-        'errorCode': '1001',
+        'errorCode': '100',
     })})
 
     return router;
