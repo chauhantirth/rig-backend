@@ -12,10 +12,8 @@ async function findItem(client, db_name, collection) {
 };
 
 async function modifyItem(client, filterItemId, newItemData, db_name, collection) {
-    // console.log(`Inside modifyItem(). recieved: ${JSON.stringify({newItemData})} to update _id: ${filterItemId}`)
     var o_id = new ObjectId(filterItemId);
     const result = await client.db(db_name).collection(collection).updateOne({_id: o_id}, {$set: newItemData});
-    console.log(`Items Updated: ${JSON.stringify(result)}`);
     return result;
 }
 
@@ -124,6 +122,7 @@ async function updateItem(req, res, mongoClient) {
     } else {
         res.send({
             'success': true,
+            'message': 'Item successfully updated on the database.',
             'container': JSON.stringify(result),
         });
         return;
